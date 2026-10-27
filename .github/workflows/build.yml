@@ -18,22 +18,40 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Aceptar licencias de Android SDK
+      - name: Aceptar licencias y configurar Keystore
         run: |
           yes | sdkmanager --licenses || true
+          
+          # Generar clave debug para firmar el APK
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore /home/runner/debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999
+
+          # Configurar Godot para que reconozca el SDK y la clave
+          mkdir -p ~/.config/godot
+          cat <<EOF > ~/.config/godot/editor_settings-4.tres
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/debug_keystore = "/home/runner/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
 
       - name: Descargar Godot Engine y Plantillas
         run: |
           GODOT_VERSION="4.2.2-stable"
+          
+          # Descargar ejecutable de Godot
           wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip
           unzip -q Godot_v${GODOT_VERSION}_linux.x86_64.zip
           mv Godot_v${GODOT_VERSION}_linux.x86_64 godot
           chmod +x godot
 
-          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}
+          # Descargar plantillas e instalar en la ruta 4.2.2.stable
+          mkdir -p ~/.local/share/godot/export_templates/4.2.2.stable
           wget -q https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz
           unzip -q Godot_v${GODOT_VERSION}_export_templates.tpz
-          mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}/
+          mv templates/* ~/.local/share/godot/export_templates/4.2.2.stable/
 
       - name: Compilar APK Android
         run: |
@@ -45,4 +63,3 @@ jobs:
         with:
           name: f1-mobile-2026-apk
           path: build/android/f1-mobile-2026.apk
-
