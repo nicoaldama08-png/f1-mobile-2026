@@ -1,0 +1,25 @@
+config_version=5
+
+[application]
+
+config/name="F1 Mobile 2026"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.2", "Forward Plus")
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/mode=3
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/handheld/orientation=1
+
+[input_devices]
+
+sensors/enable_accelerometer=true
+sensors/enable_gyroscope=true
+
+[rendering]
+
+renderer/rendering_method="mobile"
